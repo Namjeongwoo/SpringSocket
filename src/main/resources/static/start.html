@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>daou</title>
+	<meta http-equiv="Cotent-Type" content="text/html; charset=UTF-8" />
+	<style>
+		body {
+			display: flex;
+			flex-direction: column;
+			/* justify-content: center;
+            align-items: center; */
+			padding: 0;
+			margin: 0;
+			/* background-color: blue; */
+		}
+
+		/* 헤더 박스 (로고) */
+		header {
+			height: 60px;
+			padding: 8px;
+			display: flex;
+			justify-content: space-between;
+			flex-grow: 0;
+			border-bottom: 1px solid gainsboro;
+		}
+
+
+		/*  전체 박스 중앙정렬 */
+		.container {
+
+			min-height: 600px;
+			height: 100%;
+
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			margin: 24px;
+			margin-bottom: 48px;
+
+		}
+
+		/* 정보 박스 */
+		.Info_box {
+			display: flex;
+			flex-direction: column;
+			width: 400px;
+		}
+
+		/* 입력창 */
+		.Info_box input {
+			width: 100%;
+			height: 60px;
+			font-size: large;
+			padding: 8px;
+			box-sizing: border-box;
+		}
+
+		/* 각 요소 박스(입력창+텍스트) */
+		.Info_box>div {
+			margin-top: 8px;
+			margin-bottom: 8px;
+		}
+
+		/* 정보 글씨 */
+		.Info_box p {
+			margin: 0;
+			padding: 0;
+			display: none;
+		}
+
+		/* 그리드 */
+		.repeat {
+			display: grid;
+			grid-template-rows: 80px 80px;
+			grid-template-columns: 1fr 1fr;
+			width: 90%;
+			max-width: 1240px;
+			margin: 0 auto;
+			display: grid;
+			grid-template-rows: auto;
+			grid-gap: 10px;
+
+
+		}
+
+		.repeat>* {
+			border-radius: 5px;
+			padding: 1rem;
+			border: 2px solid #aaa;
+			/* background-color: rosybrown; */
+
+		}
+
+		/* 출력 테이블 */
+		table {
+			width: 100%;
+			border-top: 1px solid #444444;
+			border-collapse: collapse;
+		}
+
+		th,
+		td {
+			border-bottom: 1px solid #444444;
+			border-left: 1px solid #444444;
+			padding: 10px;
+
+		}
+
+		th:first-child,
+		td:first-child {
+			border-left: none;
+		}
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+
+			//데이터 전송 이벤트
+			$('#btn').on('click', process);
+
+
+			//Repeat 데이터 클릭 이벤트
+			$('.repeat_child').click(function () {
+				if ($(this).css("background-color") == "rgb(255, 206, 85)") {
+					$(this).css("background-color", "white");
+
+					if (Number($("input[name=inputCount]").val()) != 0) {
+						$("input[name=inputCount]").val(Number($("input[name=inputCount]").val()) - 1);
+					}
+				} else {
+
+					$(this).css("background-color", "rgb(255 ,206, 85)");
+					if (Number($("input[name=inputCount]").val()) < 4) {
+						$("input[name=inputCount]").val(Number($("input[name=inputCount]").val()) + 1);
+					}
+				}
+			})
+
+
+		});
+
+
+		//Form 데이터 전송 함수
+		function process() {
+			if ($("input[name=accountNumber]").val() == null || $("input[name=accountNumber]").val() == "" || $("input[name=accountNumber]").val().length != 8) {
+				return alert('계좌번호를 입력해주세요');
+			}
+
+			if ($("input[name=password]").val() == null || $("input[name=password]").val() == "" || $("input[name=password]").val().length != 4) {
+				return alert('비밀번호를 입력해주세요');
+			}
+
+			if ($("input[name=inputCount]").val() == null || $("input[name=inputCount]").val() == "" || $("input[name=inputCount]").val() == 0) {
+				return alert('입력 데이터를 선택해주세요');
+			}
+
+			addSelectData();
+
+			let formData = $('#frm').serialize();
+
+			$.ajax({
+				type: 'POST',
+				dataType: 'json',
+
+				url: '/inquiry',
+				data: formData,
+				success: function (res) {
+					console.log('JSON 요청 데이터: ' + formData);
+					checkJsonResponseData(res);
+					makeTable(res);
+				},
+				error: function (request, status, error) {
+
+					alert("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+				}
+			});
+
+		}
+
+
+		//JSON 응답 데이터 콘솔 출력 함수
+		function checkJsonResponseData(res) {
+			let json = res;
+
+			$.each(json, function (key, value) {
+				console.log('key:' + key + ' / ' + 'value:' + value);
+			});
+
+
+		}
+
+		//JSON 응답 데이터 Table 생성 함수
+		function makeTable(res) {
+			$('#jsonTarget').empty();
+			let result = "";
+
+			let trStart = "<tr class='tableTr'>";
+			let trEnd = "</tr>";
+			$.each(res.inquiryResults, function (index, element) {
+				result += trStart + "<td>" + res.inquiryResults[index].currencyCode + "</td>";
+				result += "<td>" + res.inquiryResults[index].orderableAmount + "</td>";
+				result += "<td>" + res.inquiryResults[index].evidenceAmonut + "</td>";
+				result += "<td>" + res.inquiryResults[index].marginBalance + "</td>" + trEnd;
+			});
+
+
+			$('#jsonTarget').append(result);
+		}
+
+		// 그리드 선택 데이터 hidden 추가 함수
+		function addSelectData() {
+
+			$('.addClass').empty();
+
+			let addDiv = $('<div></div>');
+			addDiv.attr("name", "addDiv");
+
+			let j = 0;
+
+			$('.repeat_child').each(function (index) {
+
+				if ($(this).css("background-color") == "rgb(255, 206, 85)") {
+					let eventCode = $(this).children('input[name=eventCode]').val();
+					let sellType = $(this).children('input[name=sellType]').val();
+					let abroadOrderType = $(this).children('input[name=abroadOrderType]').val();
+					let orderPrice = $(this).children('input[name=orderPrice]').val();
+					let amount = $(this).children('input[name=amount]').val();
+
+
+					addDiv.append($('<input/>', {type: 'hidden', name: 'repeatData[' + j + '].eventCode', value: eventCode}));
+					addDiv.append($('<input/>', {type: 'hidden', name: 'repeatData[' + j + '].sellType', value: sellType}));
+					addDiv.append($('<input/>', {type: 'hidden', name: 'repeatData[' + j + '].abroadOrderType', value: abroadOrderType}));
+					addDiv.append($('<input/>', {type: 'hidden', name: 'repeatData[' + j + '].orderPrice', value: orderPrice}));
+					addDiv.append($('<input/>', {type: 'hidden', name: 'repeatData[' + j + '].amount', value: amount}));
+
+					j++;
+				}
+			});
+
+			$('.addClass').append(addDiv);
+		}
+
+
+	</script>
+</head>
+
+<body>
+	<header>
+		<p>daou task</p>
+	</header>
+
+	
+	<form class="container" name="frm" id="frm">
+		<p>
+			<!-- 고객 정보 입력 안내-->
+			계좌번호, 계좌 비밀번호를 입력해주세요
+		</p>
+
+		<!-- 고객 입력 정보 -->
+		<div class="Info_box">
+
+			<!-- 계좌번호 -->
+			<div>
+				<input type="text" name="accountNumber" placeholder="계좌번호" maxlength="8"
+					oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
+				<p>계좌번호</p>
+			</div>
+
+			<!-- 비밀번호 -->
+			<div>
+				<input type="password" name="password" placeholder="비밀번호" maxlength="4"
+					oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
+				<p>비밀번호</p>
+			</div>
+
+			<!-- 계좌구분 -->
+			<div>
+				<input type="hidden" name="accountType" value="01">
+				<p>계좌구분</p>
+			</div>
+
+			<!-- 비밀번호입력매체구분 -->
+			<div>
+				<input type="hidden" name="passwordType" value="00">
+				<p>비밀번호입력매체구분</p>
+			</div>
+
+			<!-- 입력건수 -->
+			<div>
+				<input type="number" name="inputCount" placeholder="입력건수" max="4" min="0" readonly>
+				<p>입력건수</p>
+			</div>
+			<!--Grid 선택 데이터 -->
+			<div class="addClass">
+
+			</div>
+
+	</form>
+
+	<!-- 반복 데이터-->
+	<div class="repeat">
+		<div class="repeat_child">
+			종목코드:023590</br>
+			매도수구분:1</br>
+			해외주문유형:0</br>
+			주문표시가격:1000</br>
+			수량:100
+
+			<input type="hidden" name="eventCode" value="023590">
+			<input type="hidden" name="sellType" value="1">
+			<input type="hidden" name="abroadOrderType" value="0">
+			<input type="hidden" name="orderPrice" value="1000">
+			<input type="hidden" name="amount" value="100">
+
+
+		</div>
+		<div class="repeat_child">
+			종목코드:032190</br>
+			매도수구분:2</br>
+			해외주문유형:6</br>
+			주문표시가격:2000</br>
+			수량:200
+			<input type="hidden" name="eventCode" value="032190">
+			<input type="hidden" name="sellType" value="2">
+			<input type="hidden" name="abroadOrderType" value="6">
+			<input type="hidden" name="orderPrice" value="2000">
+			<input type="hidden" name="amount" value="200">
+
+		</div>
+		<div class="repeat_child">
+			종목코드:039490</br>
+			매도수구분:1</br>
+			해외주문유형:6</br>
+			주문표시가격:3000</br>
+			수량:300
+			<input type="hidden" name="eventCode" value="039490">
+			<input type="hidden" name="sellType" value="1">
+			<input type="hidden" name="abroadOrderType" value="6">
+			<input type="hidden" name="orderPrice" value="3000">
+			<input type="hidden" name="amount" value="300">
+
+		</div>
+		<div class="repeat_child">
+			종목코드:760001</br>
+			매도수구분:2</br>
+			해외주문유형:0</br>
+			주문표시가격:4000</br>
+			수량:400
+			<input type="hidden" name="eventCode" value="760001">
+			<input type="hidden" name="sellType" value="2">
+			<input type="hidden" name="abroadOrderType" value="0">
+			<input type="hidden" name="orderPrice" value="4000">
+			<input type="hidden" name="amount" value="400">
+
+		</div>
+	</div>
+
+	<div>
+		<!-- 조회 버튼 -->
+		<input type="button" value="조회" id="btn">
+	</div>
+	
+	<!-- 결과 출력 테이블 -->
+	<table>
+
+		<thead>
+			<tr>
+				<th>통화코드</th>
+				<th>주문가능금액주문가능총액</th>
+				<th>소요증거금위탁증거금</th>
+				<th>잔액추가증거금</th>
+			</tr>
+		</thead>
+
+		<tbody id="jsonTarget">
+		</tbody>
+
+	</table>
+
+	</div>
+
+
+
+</body>
+
+</html>

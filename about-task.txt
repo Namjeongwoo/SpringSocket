@@ -1,0 +1,18 @@
+[개발환경]
+스프링부트 (STS 4)
+
+
+[테스트 실행 순서]
+1. TCPServer.java -> Run As -> Java Application
+2. DemoApplication.java -> Run As -> Spring boot App
+3. 크롬 URL http://localhost:8080/main 접속
+4. 데이터(계좌번호, 계좌비밀번호) 입력 (계좌구분, 비밀번호입력매체구분값은 고정 세팅하였습니다.)
+5. 반복 데이터 선택
+6. 조회 버튼 클릭
+7. 하단 테이블(출력 데이터) 확인
+8. 클라이언트 log 확인 (경로: 해당프로젝트 디렉토리 \demo\logs\daouClient.log)
+
+
+
+※  Server log 확인 -> 콘솔 이용 (예시 파일 exampleServer.log 첨부하였습니다.)
+※  응답 데이터 파일: \demo\src\main\java\com\example\demo\tcp\response.dat
